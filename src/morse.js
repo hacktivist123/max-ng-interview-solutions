@@ -64,41 +64,27 @@ Object.freeze(MORSE_CODE);
  * @param {string} morseCode The string to decode.
  */
 function decodeMorse(morseCode) {
-  const englishWordsContainer = [];
-  const characterSpacing = ' ';
-  const wordSpacing = '   ';
+ 
+    let decodedWord = "";
+    let morseCodeTrim = morseCode.trim();
+    let codeArray = morseCodeTrim.split(' ');
 
-  //Trim trailing and leading whitespace from morse code inpit
-  morseCode = morseCode.trim();
+    //loop through input array
+    for (let i = 0; i < codeArray.length; i++) {
 
-  //Split the morse code input by word spacing
-  let splitWords = morseCode.split(wordSpacing);
+        // checks for 2 trailing empty string characters, and translates them into a space then inserts into decodedword array
+        if (codeArray[i] === "" && codeArray[i + 1] === "") {
+            decodedWord = decodedWord + " ";
+        }
 
-  //Loop through each split morse word
-  splitWords.forEach((word)=>{
-    const englishCharacterContainer = [];
+        //loop through MORSE_CODE array translates and insert correct tranlation into decodedword array
+        for (let sign in MORSE_CODE) {
+            if (Object.is(sign, codeArray[i])) {
+                decodedWord = decodedWord + MORSE_CODE[sign];
+            }
+        }
+    }
 
-    //Split each morse word into an array of morse characters
-    const splitCharacters = word.split(characterSpacing);
-    
-    //loop through each morse character in the morse character array
-    splitCharacters.forEach((morseCharacter)=>{
-      //Get the english equivalent of the morse character
-      if(MORSE_CODE.hasOwnProperty(morseCharacter)){
-        const englishCharacter = MORSE_CODE[morseCharacter];
-      } 
-
-      englishCharacterContainer.push(englishCharacter);
-    });
-
-    //Join the array of english characters into a word
-    const englishWord = englishCharacterContainer.join('');
-
-    englishWordsContainer.push(englishWord);
-  });
-
-  //Finally join the contents of the English Words Container into one string
-  return englishWordsContainer.join(' ');
-} 
-
+    return decodedWord;
+}
 module.exports = decodeMorse;
