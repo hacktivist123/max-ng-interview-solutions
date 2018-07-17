@@ -4,99 +4,107 @@
  * @param {array} input Array of student objects
  */
 function classifier(input) {
-const data = input;
-	const students = [];
-	const ages = [];
-	const groups = {};
-	const organizedGroups = {};
-	const noOfGroups = '';
 
-	//Extract Age
-	data.map((student)=>{
-		var dob = new Date(student.dob);
-		var yob = dob.getFullYear();
-		age = 2018 - yob;
-		students.push({
-			name: student.name,
-			age: age,
-			dob: student.dob,
-			regNo: student.regNo
-		});
+    const workobj;
 
-		ages.push(age);
-	});
+    //function to calculate age
+    function calculateAge(birthday) {
 
-	//Sort Students by Age
-	students.sort((a, b)=>{
-		return a.age - b.age;
-	});
+        const ageDifMs = Date.now() - birthday.getTime();
+        const ageDate = new Date(ageDifMs);
+        const today = new Date(Date.now());
+        const birthDate = new Date(birthday.getTime());
 
-	//sort members
-	const sortedStudentsBucket = [];
-	const ageCounter = {};
-	const counter = 1 ;
+        const ageYear = Math.abs(ageDate.getUTCFullYear() - 1970);
+        if (birthDate.getUTCMonth() > today.getUTCMonth()) {
+            ageYear = ageYear + 1
+        }
 
-	const minAge = Math.min(...ages);
-	const maxAge = Math.max(...ages);
+        return ageYear;
+    }
 
-	for(let i=minAge, j=0; i<=(maxAge+5); i+=5){
-		students.forEach((student)=>{
-			//Check if the student satisfies the condition for age difference being less than 5
-			if(Math.abs(i - student.age) <= 5){
-				//Check if the student has been sorted
-				if(sortedStudentsBucket.indexOf(student.regNo) < 0 ){
-					//Check if the group exists 
-					if(! groups.hasOwnProperty([counter])){
-						i = student.age;
-						groups[counter] = {
-							members: [],
-							sum: 0,
-							regNos: [],
-							oldest: 0
-						}
-						groups[counter].members.push(student);
-						sortedStudentsBucket.push(student.regNo);
+    //loop through to get the age for each object in array
+    for (let i = 0; i < input.length; i++) {
+        const birthDate = new Date(input[i].dob);
+        input[i].age = calculateAge(birthDate);
+    }
 
-						//Handle metadata
-						ageCounter[counter] = [];
-						ageCounter[counter].push(student.age)
-						groups[counter].sum+=student.age
-						const integerRegNo = parseInt(student.regNo);
-						groups[counter].regNos.push(integerRegNo);
-						groups[counter].oldest = student.age
+    //sort the object array by the age property
+    workobj = input.slice().sort(function (a, b) {
+        return a.age - b.age
+    });
 
-						//We increment j to indicate a new group being created
-						j=j+1;
-						organizedGroups['group'+j] = groups[counter]
-					}
-					else {
-						//Check if the bucket is full
-						if(groups[counter].members.length !== 3 ){
-							groups[counter].members.push(student);
-							sortedStudentsBucket.push(student.regNo);	
+    let result = {};
+    let group = {};
+    let tempAge = 0;
+    let tempAge2 = 0;
+    let ageSum = 0;
+    let groupCount = 0;
+    for (let i = 0; i < workobj.length; i++) {
+        const membersArr = [];
+        const regNoArr = [];
+        const ageArr = [];
+        //check difference between i and i-1 AND i and i-2 is less than 5
+        //check a key exists and the number of objects in the member group array the key holds is not more than 3
+        if ((workobj[i].age - tempAge) <= 5 && (workobj[i].age - tempAge2) <= 5 && group["members" + groupCount] && group["members" + groupCount].length < 3) {
+            //add to the current group
+            group["members" + groupCount].push({
+                "name": workobj[i].name,
+                "dob": workobj[i].dob,
+                "regNo": workobj[i].regNo,
+                "age": workobj[i].age
+            });
+            group["regNos" + groupCount].push(parseInt(workobj[i].regNo));
+        } else {
+            //create a new group
+            groupCount++;
+            membersArr.push({
+                "name": workobj[i].name,
+                "dob": workobj[i].dob,
+                "regNo": workobj[i].regNo,
+                "age": workobj[i].age
+            });
+            group["members" + groupCount] = membersArr;
+            regNoArr.push(parseInt(workobj[i].regNo));
+            group["regNos" + groupCount] = regNoArr;
+            ageSum = 0;
+        }
+        ageSum += workobj[i].age;
+        ageArr.push(workobj[i].age);
 
-							//Handle Metadata
-							ageCounter[counter].push(student.age)
-							groups[counter].sum+=student.age
-							const integerRegNo = parseInt(student.regNo);
-							groups[counter].regNos.push(integerRegNo);
+        //array index checks
+        if (typeof group["members" + groupCount][group["members" + groupCount].length - 1] !== 'undefined') {
+            //store the value in i-1 index
+            tempAge = group["members" + groupCount][group["members" + groupCount].length - 1].age;
+        }
 
-							const oldest = Math.max(...ageCounter[counter]);
-							groups[counter].oldest = oldest;
-							groups[counter].regNos.sort((a,b)=>{
-								return a-b;
-							});
+        if (typeof group["members" + groupCount][group["members" + groupCount].length - 2] !== 'undefined') {
+            //store the value in i-2 index
+            tempAge2 = group["members" + groupCount][group["members" + groupCount].length - 2].age;
+        } else {
+            //store the value in temp1 in temp2
+            tempAge2 = tempAge;
+        }
 
-							organizedGroups['group'+j] = groups[counter]
-						} 
-					}
-				}
-			}
-		});	
-		counter++;
-	}
-	organizedGroups.noOfGroups = j
-	return organizedGroups;
+        //final result object
+        result["noOfGroups"] = groupCount;
+        result["group" + groupCount] = {
+            "members": group["members" + groupCount],
+            "oldest": Math.max(null, ageArr),
+            "sum": ageSum,
+            "regNos": group["regNos" + groupCount].sort(function (a, b) {
+                return a - b
+            }),
+        }
+
+    }
+
+    // failsafe for empty array input
+    if (groupCount == 0) {
+        result["noOfGroups"] = groupCount;
+    }
+
+    return result;
 }
 
 module.exports = classifier;
