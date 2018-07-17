@@ -3,9 +3,9 @@
  *
  * @param {array} input Array of student objects
  */
-function classifier(input) {
+ function classifier(input) {
 
-    const workobj;
+     const workobj;
 
     //function to calculate age
     function calculateAge(birthday) {
@@ -40,10 +40,10 @@ function classifier(input) {
     let tempAge2 = 0;
     let ageSum = 0;
     let groupCount = 0;
-    for (let i = 0; i < workobj.length; i++) {
-        const membersArr = [];
-        const regNoArr = [];
-        const ageArr = [];
+    for (var i = 0; i < workobj.length; i++) {
+        var membersArr = [];
+        var regNoArr = [];
+        var ageArr = [];
         //check difference between i and i-1 AND i and i-2 is less than 5
         //check a key exists and the number of objects in the member group array the key holds is not more than 3
         if ((workobj[i].age - tempAge) <= 5 && (workobj[i].age - tempAge2) <= 5 && group["members" + groupCount] && group["members" + groupCount].length < 3) {
